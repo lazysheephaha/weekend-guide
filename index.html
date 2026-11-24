@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="面向大学生的周末城市探索指南：按兴趣、天气、预算推荐活动，支持组队、打卡和攻略分享。">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>周末去哪 · 城市探索指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app shell — sticky top bar + tab views; preference rail beside the feed on desktop, stacked on phones; bottom tab bar on phones */
+:root{
+  --bg:#F3F5F0; --surface:#FFFFFF; --sunk:#E8ECE4; --ink:#1B2623; --muted:#5E6B66; --line:#D6DCD3;
+  --accent:#0E7C62; --accent-ink:#FFFFFF; --accent-soft:#D7EDE5; --ticket:#F2B705; --ticket-soft:#FCF1CC;
+  --warn:#C2410C; --warn-soft:#FBE3D6; --rain:#2C6DB5; --rain-soft:#DCE8F6;
+  --c-exh:#7C5CC4; --c-mkt:#D9822B; --c-show:#C23B5A; --c-hike:#3C8D3F; --c-food:#B4651E; --c-craft:#2F7F9E; --c-sport:#4E6CD1;
+  --display:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111816; --surface:#1A2320; --sunk:#222D29; --ink:#E6ECE8; --muted:#9AA8A2; --line:#2E3A36;
+  --accent:#3FBF97; --accent-ink:#0B1311; --accent-soft:#183A31; --ticket:#F2C230; --ticket-soft:#3A3115;
+  --warn:#F08A5D; --warn-soft:#3D2418; --rain:#7DB1EC; --rain-soft:#1C2C40; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#111816; --surface:#1A2320; --sunk:#222D29; --ink:#E6ECE8; --muted:#9AA8A2; --line:#2E3A36;
+  --accent:#3FBF97; --accent-ink:#0B1311; --accent-soft:#183A31; --ticket:#F2C230; --ticket-soft:#3A3115;
+  --warn:#F08A5D; --warn-soft:#3D2418; --rain:#7DB1EC; --rain-soft:#1C2C40; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:20px;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:18px;letter-spacing:.02em;white-space:nowrap}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:15px;font-weight:900}
+.brand small{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.08em}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tab{border:0;background:none;padding:8px 14px;border-radius:999px;color:var(--muted);font-weight:500;white-space:nowrap}
+.tab:hover{background:var(--sunk);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.tab .badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--ticket);color:#1B1B1B;font-size:11px;font-family:var(--mono);line-height:18px;text-align:center}
+.city{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.city select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px 8px}
+
+.wrap{max-width:1180px;margin:0 auto;padding-block:24px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* bottom bar on phones */
+.bottom{display:none}
+@media (max-width:760px){
+  .tabs{display:none}
+  .bottom{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .bottom .tab{flex:1;border-radius:0;padding:10px 0 8px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .bottom .tab[aria-current="page"]{background:none;color:var(--accent);font-weight:700}
+  .bottom .tab svg{width:20px;height:20px}
+  .city span{display:none}
+}
+.bottom .tab svg{display:none}
+@media (max-width:760px){.bottom .tab svg{display:block}}
+
+/* common */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.chip.good{background:var(--accent-soft);color:var(--accent)}
+.chip.bad{background:var(--warn-soft);color:var(--warn)}
+.chip.rain{background:var(--rain-soft);color:var(--rain)}
+.chip.tk{background:var(--ticket-soft);color:var(--ink)}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:500}
+.sec-h{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sec-h h2{font-size:22px;font-weight:900}
+.sec-h p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.empty{padding:32px 20px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:var(--r)}
+.sample{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:500}
+label.f input,label.f select,label.f textarea{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;color:var(--ink);font-size:15px;font-weight:400}
+textarea{resize:vertical;min-height:90px}
+
+/* discover */
+.disc{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.disc{grid-template-columns:minmax(0,1fr)}}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);display:flex;flex-direction:column;gap:16px}
+@media (max-width:900px){.rail{position:static}}
+.panel{padding:16px}
+.panel h3{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.weather{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wday{border-radius:12px;padding:10px 12px;background:var(--sunk);border:1.5px solid transparent;text-align:left}
+.wday[aria-pressed="true"]{border-color:var(--ink);background:var(--surface)}
+.wday b{display:block;font-size:13px}
+.wday .cond{font-size:20px;font-weight:900;font-family:var(--display)}
+.wday .t{font-size:12px;color:var(--muted)}
+.wday.rainy .cond{color:var(--rain)}
+.wday.sunny .cond{color:var(--c-mkt)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.range-row{display:flex;align-items:center;gap:10px}
+.range-row input[type=range]{flex:1;accent-color:var(--accent)}
+.range-row output{min-width:64px;text-align:right;font-weight:500}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:18px;line-height:1}
+.stepper output{min-width:52px;text-align:center;font-weight:500}
+
+.brief{padding:18px 20px;display:flex;gap:16px;align-items:flex-start;background:var(--ink);color:var(--bg);border:0}
+.brief .eyebrow{color:inherit;opacity:.7}
+.brief p{margin:4px 0 0;font-size:16px;line-height:1.7}
+.brief strong{color:var(--ticket)}
+.brief-ico{flex:none;width:40px;height:40px;border-radius:12px;background:var(--ticket);color:#1B1B1B;display:grid;place-items:center;font-weight:900}
+
+.feed-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:18px 0 12px}
+.feed-tools .count{margin-right:auto;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.act{display:flex;flex-direction:column;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.act:hover{transform:translateY(-2px);box-shadow:0 8px 24px -12px rgba(0,0,0,.25)}
+.cover{height:118px;position:relative;padding:12px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;border:0;text-align:left;width:100%}
+.cover .cat{font-size:12px;font-weight:700;letter-spacing:.1em;background:rgba(0,0,0,.22);padding:2px 8px;border-radius:6px;align-self:flex-start}
+.cover .big{font-family:var(--display);font-weight:900;font-size:40px;line-height:1;opacity:.28;position:absolute;right:10px;bottom:4px;letter-spacing:-.02em}
+.cover .match{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.95);color:#1B2623;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;font-family:var(--mono)}
+.act-b{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.act-b h3{font-size:16px;font-weight:700}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted)}
+.reasons{display:flex;flex-wrap:wrap;gap:4px}
+.act-f{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:6px}
+.price{font-family:var(--mono);font-weight:500;font-size:18px;margin-right:auto}
+.price small{font-size:12px;color:var(--muted);font-family:var(--body)}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(10,15,13,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:0}
+@media (min-width:700px){.scrim{align-items:center;padding:24px}}
+.sheet{background:var(--surface);width:100%;max-width:620px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:700px){.sheet{border-radius:18px}}
+.sheet .cover{height:150px}
+.sheet-b{padding:18px 20px 22px;display:flex;flex-direction:column;gap:14px}
+.sheet-b h2{font-size:22px;font-weight:900}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kv div{background:var(--sunk);border-radius:10px;padding:8px 10px}
+.kv span{display:block;font-size:12px;color:var(--muted)}
+.kv b{font-weight:500}
+.x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#1B2623;font-size:18px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.calc{background:var(--ticket-soft);border-radius:12px;padding:12px 14px;font-size:14px}
+.calc .num{font-size:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.form-grid{grid-template-columns:1fr}}
+.form-grid .full{grid-column:1/-1}
+
+/* teams */
+.two{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.list{display:flex;flex-direction:column;gap:12px}
+.team{padding:14px 16px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+@media (max-width:560px){.team{grid-template-columns:auto minmax(0,1fr)}.team .team-act{grid-column:1/-1}}
+.dot{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:900;font-family:var(--display)}
+.team h3{font-size:15px;font-weight:700}
+.team p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.seats{display:flex;gap:4px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.seat{width:24px;height:24px;border-radius:50%;background:var(--sunk);border:1.5px dashed var(--line);font-size:11px;display:grid;place-items:center;color:var(--muted)}
+.seat.on{background:var(--accent-soft);border:1.5px solid var(--accent);color:var(--accent);font-weight:700}
+.seat.me{background:var(--accent);color:var(--accent-ink)}
+.team-act{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.code{font-family:var(--mono);letter-spacing:.15em;background:var(--sunk);padding:2px 8px;border-radius:6px}
+.howto{padding:16px}
+.howto ol{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:6px}
+
+/* check-in */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{padding:14px 16px}
+.stat span{font-size:12px;color:var(--muted)}
+.stat b{display:block;font-family:var(--mono);font-size:26px;font-weight:500;line-height:1.2}
+.passport{padding:16px;margin-bottom:20px}
+.stamps{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-top:10px}
+@media (max-width:640px){.stamps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.stamp{aspect-ratio:1;max-width:100%;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:4px;line-height:1.2}
+.stamp.got{border-style:solid;color:#fff;transform:rotate(-8deg)}
+.stamp small{display:block;font-weight:400;font-size:10px;opacity:.85}
+.log{display:flex;flex-direction:column;gap:12px}
+.entry{display:grid;grid-template-columns:92px minmax(0,1fr);gap:14px;padding:12px}
+.entry .ph{width:92px;height:92px;border-radius:10px;background:var(--sunk);object-fit:cover;display:grid;place-items:center;color:var(--muted);font-size:12px}
+.entry h3{font-size:15px;font-weight:700}
+.entry p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.stars{color:var(--ticket);letter-spacing:2px}
+.star-in{display:flex;gap:2px}
+.star-in button{border:0;background:none;font-size:24px;color:var(--line);padding:0 2px}
+.star-in button.on{color:var(--ticket)}
+
+/* guides */
+.gfilter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.guide{padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.guide h3{font-size:17px;font-weight:700}
+.guide .by{font-size:13px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.guide .body{font-size:14px;white-space:pre-line;color:var(--ink)}
+.guide .body.clip{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.route{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px}
+.route .stop{background:var(--sunk);border-radius:8px;padding:2px 8px}
+.route .arr{color:var(--muted)}
+.guide-f{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.guide-f .sp{margin-right:auto}
+.liked{color:var(--warn);border-color:var(--warn)}
+
+/* plan */
+.days{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:760px){.days{grid-template-columns:1fr}}
+.day{padding:16px}
+.day-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.day-h h3{font-size:18px;font-weight:900}
+.tl{position:relative;display:flex;flex-direction:column;gap:10px;padding-left:18px}
+.tl::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.stop-c{position:relative;background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.stop-c::before{content:"";position:absolute;left:-17px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--surface)}
+.stop-c b{font-size:14px;display:block}
+.stop-c span{font-size:12px;color:var(--muted)}
+.total{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px;margin-top:20px}
+.total b{font-family:var(--mono);font-size:24px;font-weight:500}
+.bar{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden;margin-top:6px;width:min(320px,100%)}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar i.over{background:var(--warn)}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:60;box-shadow:0 8px 24px -8px rgba(0,0,0,.4);max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.hidden-input{position:absolute;opacity:0;width:1px;height:1px}
+.copybox{font-family:var(--mono);font-size:13px;background:var(--sunk);border-radius:10px;padding:10px 12px;white-space:pre-wrap;word-break:break-all;user-select:all}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><div class="brand-mark">周</div><div>周末去哪<small>CITY WEEKEND</small></div></div>
+    <nav class="tabs" id="tabsTop" aria-label="主导航"></nav>
+    <label class="city"><span>城市</span>
+      <select id="citySel" aria-label="城市"><option>杭州</option></select>
+    </label>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<nav class="bottom" id="tabsBottom" aria-label="主导航"></nav>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* ---------- data (示例数据) ---------- */
+const CATS = {
+  exh:{n:'展览',c:'var(--c-exh)',g:'linear-gradient(135deg,#6B4FB8,#A58BE0)'},
+  mkt:{n:'市集',c:'var(--c-mkt)',g:'linear-gradient(135deg,#C9711E,#F0B25A)'},
+  show:{n:'演出',c:'var(--c-show)',g:'linear-gradient(135deg,#A8304C,#E46C88)'},
+  hike:{n:'徒步',c:'var(--c-hike)',g:'linear-gradient(135deg,#2F7432,#77B85A)'},
+  food:{n:'探店',c:'var(--c-food)',g:'linear-gradient(135deg,#94511A,#D99B55)'},
+  craft:{n:'手作',c:'var(--c-craft)',g:'linear-gradient(135deg,#226B87,#5BB0C9)'},
+  sport:{n:'运动',c:'var(--c-sport)',g:'linear-gradient(135deg,#3A55B8,#7F98EA)'},
+};
+const ACTS = [
+  {id:'a1',t:'老厂房当代影像展：城市的褶皱',cat:'exh',area:'拱墅区 · 运河边',indoor:true,price:68,stu:40,dur:2,days:['sat','sun'],time:'10:00–18:00',g:[1,6],desc:'由旧纺织厂改造的展厅，展出 30 组关于城市变迁的摄影与影像装置。凭学生证半价，周日下午有策展人导览。',tip:'周日 14:00 导览免费，提前 10 分钟到前台登记。',heat:86},
+  {id:'a2',t:'运河边手作 & 二手市集',cat:'mkt',area:'拱墅区 · 桥西',indoor:false,price:0,stu:0,dur:3,days:['sat'],time:'13:00–20:00',g:[1,8],desc:'80+ 摊位：独立设计饰品、旧书、黑胶、宠物零食。傍晚有露天乐队。入场免费，建议预留 50–100 元。',tip:'带上环保袋；19:00 后灯串亮起，最适合拍照。',heat:92},
+  {id:'a3',t:'龙井茶园轻徒步 8km',cat:'hike',area:'西湖区 · 龙井村',indoor:false,price:25,stu:25,dur:4,days:['sat','sun'],time:'08:30 集合',g:[2,10],desc:'九溪烟树—龙井村—狮峰山，累计爬升约 300m，新手友好。终点可以喝杯明前茶。费用为往返公交+茶水。',tip:'雨天石阶湿滑，建议穿防滑鞋；全程无补给，自带水。',heat:78},
+  {id:'a4',t:'Livehouse 独立乐队拼盘夜',cat:'show',area:'上城区 · 南宋御街',indoor:true,price:120,stu:100,dur:3,days:['sat'],time:'20:00 开演',g:[1,4],desc:'三支本地独立乐队轮番登场：后摇、城市民谣、合成器流行。站票，含一杯饮品。',tip:'学生票需现场出示学生证；最后一班地铁 23:00 左右，注意时间。',heat:81},
+  {id:'a5',t:'陶艺拉坯体验课（双人）',cat:'craft',area:'西湖区 · 文三路',indoor:true,price:158,stu:138,dur:2.5,days:['sat','sun'],time:'14:00 / 16:30 两场',g:[2,6],desc:'老师一对四带教，从揉泥到拉坯完成一件杯或碗，烧制后两周寄到家。',tip:'穿深色衣服；指甲剪短会更好操作。',heat:74},
+  {id:'a6',t:'城西露天电影 & 夜宵小摊',cat:'show',area:'余杭区 · 未来科技城',indoor:false,price:39,stu:39,dur:3,days:['sun'],time:'18:30 入场',g:[1,8],desc:'草坪露天放映经典公路片，提供野餐垫租借，周边有十几家夜宵小摊。',tip:'下雨会改期，出发前看公告；带件外套，晚上偏凉。',heat:69},
+  {id:'a7',t:'省博特展：古代地图里的江南',cat:'exh',area:'西湖区 · 孤山',indoor:true,price:0,stu:0,dur:2,days:['sat','sun'],time:'09:00–17:00',g:[1,10],desc:'免费预约入场。展出明清舆图与水系图 120 余件，互动屏可以叠加今天的街道。',tip:'需提前一天在公众号预约；出馆就是西湖，顺路散步。',heat:88},
+  {id:'a8',t:'小河直街本地人早餐巡礼',cat:'food',area:'拱墅区 · 小河直街',indoor:false,price:45,stu:45,dur:2,days:['sat','sun'],time:'07:30–10:00',g:[2,5],desc:'片儿川、葱包桧、酥油饼、豆浆——五家老店连吃，跟着路线走不踩雷。',tip:'越早越好，9 点后热门店要排队。',heat:72},
+  {id:'a9',t:'室内攀岩新手体验',cat:'sport',area:'滨江区 · 星光大道',indoor:true,price:98,stu:78,dur:2,days:['sat','sun'],time:'10:00–22:00',g:[1,6],desc:'含装备租赁与 20 分钟教练入门指导，抱石区和顶绳区都能玩。下雨天的热门备选。',tip:'穿运动裤，别戴首饰；第二天手臂会酸。',heat:76},
+  {id:'a10',t:'湘湖环湖骑行 20km',cat:'sport',area:'萧山区 · 湘湖',indoor:false,price:30,stu:30,dur:3,days:['sat','sun'],time:'全天',g:[2,8],desc:'沿湖绿道平坦无车，适合多人组队慢骑；沿途有咖啡车和观景台。',tip:'租车点在跨湖桥，押金可用扫码免押。',heat:70},
+  {id:'a11',t:'剧本推理密室（6 人本）',cat:'show',area:'上城区 · 湖滨',indoor:true,price:138,stu:118,dur:4,days:['sat','sun'],time:'13:00 / 19:00',g:[5,6],desc:'沉浸式民国本，难度中等，适合朋友聚会；有 DM 全程主持。',tip:'凑不满 6 人可以在「组队」里找搭子拼车。',heat:83},
+  {id:'a12',t:'书店咖啡角读书会',cat:'craft',area:'西湖区 · 南山路',indoor:true,price:35,stu:35,dur:2,days:['sun'],time:'15:00–17:00',g:[1,12],desc:'本周主题《看不见的城市》，读没读完都能来，含一杯手冲。',tip:'坐窗边能看到湖；来晚了也可以安静旁听。',heat:58},
+];
+const DEFAULT_WEATHER = {
+  sat:{cond:'晴',k:'sunny',temp:'11–19°C',rain:10,note:'适合户外'},
+  sun:{cond:'小雨',k:'rainy',temp:'9–14°C',rain:70,note:'午后转中雨'},
+};
+const SEED_TEAMS = [
+  {id:'t1',act:'a3',title:'周六早起茶园徒步，配速慢',host:'林小满',school:'浙大',day:'sat',members:['林小满','阿乔','Momo'],max:6,note:'8:20 九溪公交站见，走不动就喝茶。',code:'K7Q2'},
+  {id:'t2',act:'a11',title:'民国本还差 2 人！',host:'周周',school:'浙工大',day:'sat',members:['周周','大鱼','小樱','阿凯'],max:6,note:'19:00 场，新手友好，不会就跟着 DM 走。',code:'P3M9'},
+  {id:'t3',act:'a4',title:'后摇爱好者一起蹦',host:'Echo',school:'中国美院',day:'sat',members:['Echo'],max:3,note:'看完一起吃夜宵～',code:'R8D4'},
+  {id:'t4',act:'a5',title:'陶艺课双人拼单',host:'橘子',school:'杭师大',day:'sun',members:['橘子'],max:2,note:'双人价更划算，16:30 场。',code:'C5T1'},
+];
+const SEED_GUIDES = [
+  {id:'g1',title:'雨天也不亏：省博 + 攀岩 + 读书会一日线',author:'小鹿',school:'浙大',acts:['a7','a9','a12'],tags:['雨天','室内','人均<150'],budget:113,body:'上午去省博看地图特展（记得前一天预约），出馆在孤山吃个简餐。\n下午打车去滨江攀岩，学生价 78 元，含教练入门。\n傍晚回南山路书店，赶上 15:00 场读书会就去，赶不上就窗边坐坐。\n总花费约 113 元/人，全程不怕下雨。',likes:128,saved:false,liked:false,days:'1 天'},
+  {id:'g2',title:'0 元周六：运河市集逛吃攻略',author:'阿乔',school:'浙工大',acts:['a8','a2'],tags:['省钱','拍照','晴天'],budget:60,body:'早上小河直街早餐巡礼，片儿川必点。\n中午回去补觉，下午 3 点再到桥西市集，先逛二手书摊再看饰品。\n19:00 后灯串亮起，乐队开唱，这时候拍照最出片。\n预算：早餐 45 + 市集随缘，控制在 60 以内很轻松。',likes:96,saved:false,liked:false,days:'1 天'},
+  {id:'g3',title:'第一次茶园徒步：路线、装备和避坑',author:'Momo',school:'杭师大',acts:['a3'],tags:['徒步','新手','晴天'],budget:25,body:'九溪公交站下车，沿溪走到龙井村大约 1.5 小时。\n狮峰山那段台阶比较陡，慢慢走。\n装备：防滑运动鞋、1L 水、薄外套。\n避坑：村里的茶别在第一家就买，往里走价格更实在。',likes:74,saved:false,liked:false,days:'半天'},
+];
+const INTERESTS = Object.entries(CATS).map(([k,v])=>({k,n:v.n}));
+
+/* ---------- state ---------- */
+const KEY='weekendGuide.v1';
+const defaults = {
+  prefs:{interests:['exh','mkt','hike'],budget:150,group:3,day:'sat',student:true,sort:'match'},
+  weather:DEFAULT_WEATHER,
+  teams:SEED_TEAMS, myTeams:[], guides:SEED_GUIDES,
+  checkins:[
+    {id:'c0',act:'a7',date:'2026-11-15',rating:5,note:'舆图互动屏太好玩了，找到了自己学校的位置。',photo:null,cost:0,sample:true},
+  ],
+  plan:{sat:[],sun:[]}, me:'我',
+};
+let S = load();
+function load(){
+  try{const raw=localStorage.getItem(KEY); if(raw){const d=JSON.parse(raw); return {...structuredClone(defaults),...d,prefs:{...defaults.prefs,...(d.prefs||{})}};}}catch(e){}
+  return structuredClone(defaults);
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('本地存储已满或不可用，本次修改不会保存')}}
+const $=(s,el=document)=>el.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const act=id=>ACTS.find(a=>a.id===id);
+const DAYN={sat:'周六',sun:'周日'};
+const priceOf=a=>S.prefs.student?a.stu:a.price;
+const money=n=>n===0?'免费':'¥'+n;
+
+/* ---------- recommendation engine ---------- */
+function score(a){
+  const p=S.prefs, reasons=[]; let s=50;
+  const days = p.day==='any'?['sat','sun']:[p.day];
+  const avail = a.days.filter(d=>days.includes(d));
+  if(!avail.length){s-=40;reasons.push(['bad',`仅${a.days.map(d=>DAYN[d]).join('/')}开放`])}
+  if(p.interests.includes(a.cat)){s+=22;reasons.push(['good','符合你的兴趣'])}
+  const pr=priceOf(a);
+  if(pr<=p.budget){s+=12; if(pr===0)reasons.push(['tk','免费']); else if(pr<=p.budget*0.5)reasons.push(['tk','预算友好'])}
+  else{s-=30;reasons.push(['bad',`超预算 ¥${pr-p.budget}`])}
+  // weather
+  const ws=(avail.length?avail:days).map(d=>S.weather[d]);
+  const wet=ws.every(w=>w.rain>=50);
+  if(wet&&!a.indoor){s-=28;reasons.push(['rain','下雨不宜'])}
+  else if(wet&&a.indoor){s+=10;reasons.push(['rain','雨天友好'])}
+  else if(!a.indoor&&ws.some(w=>w.rain<30)){s+=8;reasons.push(['good','好天气适合户外'])}
+  // group
+  if(p.group>=a.g[0]&&p.group<=a.g[1]){s+=8;if(p.group>1)reasons.push(['good',`适合${p.group}人`])}
+  else if(p.group<a.g[0]){s-=6;reasons.push(['bad',`需${a.g[0]}人，可组队凑`])}
+  else{s-=10;reasons.push(['bad',`最多${a.g[1]}人`])}
+  if(p.student&&a.stu<a.price)reasons.push(['tk','学生优惠']);
+  s+=Math.round((a.heat-70)/6);
+  return {s:Math.max(1,Math.min(99,s)),reasons,avail};
+}
+
+/* ---------- routing ---------- */
+const VIEWS=[
+  {k:'discover',n:'发现',ico:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>'},
+  {k:'teams',n:'组队',ico:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>'},
+  {k:'plan',n:'行程',ico:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'},
+  {k:'checkin',n:'打卡',ico:'<path d="M5 13l4 4L19 7"/><rect x="2.5" y="2.5" width="19" height="19" rx="4"/>'},
+  {k:'guides',n:'攻略',ico:'<path d="M4 4.5h6a3 3 0 0 1 2 1v14a3 3 0 0 0-2-1H4zM20 4.5h-6a3 3 0 0 0-2 1v14a3 3 0 0 1 2-1h6z"/>'},
+];
+function route(){const h=location.hash.slice(1);return VIEWS.some(v=>v.k===h)?h:'discover'}
+function renderTabs(){
+  const cur=route(); const planN=S.plan.sat.length+S.plan.sun.length;
+  const html=VIEWS.map(v=>`<button class="tab" data-go="${v.k}" ${v.k===cur?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${v.ico}</svg>${v.n}${v.k==='plan'&&planN?`<span class="badge">${planN}</span>`:''}</button>`).join('');
+  $('#tabsTop').innerHTML=html; $('#tabsBottom').innerHTML=html;
+}
+function render(){
+  renderTabs();
+  const v=route();
+  ({discover:vDiscover,teams:vTeams,plan:vPlan,checkin:vCheckin,guides:vGuides})[v]();
+}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){location.hash=g.dataset.go}});
+
+/* ---------- discover ---------- */
+let catFilter='all';
+function vDiscover(){
+  const p=S.prefs;
+  const scored=ACTS.map(a=>({a,...score(a)}));
+  let list=scored.filter(x=>catFilter==='all'||x.a.cat===catFilter);
+  if(p.sort==='match')list.sort((x,y)=>y.s-x.s);
+  if(p.sort==='price')list.sort((x,y)=>priceOf(x.a)-priceOf(y.a));
+  if(p.sort==='heat')list.sort((x,y)=>y.a.heat-x.a.heat);
+  const good=scored.filter(x=>x.s>=60);
+  const days=p.day==='any'?['sat','sun']:[p.day];
+  const rainy=days.filter(d=>S.weather[d].rain>=50);
+  const top=[...scored].sort((x,y)=>y.s-x.s).slice(0,2).map(x=>x.a.t.split('：')[0].split(' ')[0]);
+  const brief = `${days.map(d=>DAYN[d]).join('和')}${rainy.length?`<strong>${rainy.map(d=>DAYN[d]).join('、')}有雨</strong>，已优先推荐室内活动；`:'天气不错，户外活动加分；'}按 <strong>${p.group} 人</strong>、人均 <strong>¥${p.budget}</strong> 以内，为你挑出 <strong>${good.length}</strong> 个高匹配活动。首选：${top.join('、')}。`;
+
+  $('#app').innerHTML=`
+  <div class="disc">
+    <aside class="rail">
+      <section class="card panel">
+        <h3>本周末天气 <span class="sample">示例预报</span></h3>
+        <div class="weather">${['sat','sun'].map(d=>{const w=S.weather[d];return `<button class="wday ${w.k}" data-wday="${d}" aria-pressed="${p.day===d}"><b>${DAYN[d]}</b><span class="cond">${w.cond}</span><div class="t num">${w.temp} · 降水${w.rain}%</div></button>`}).join('')}</div>
+        <div class="row" style="margin-top:8px;justify-content:space-between;align-items:center">
+          <button class="pill" data-wday="any" aria-pressed="${p.day==='any'}">两天都行</button>
+          <button class="btn ghost sm" id="flipW" title="切换天气，看推荐如何变化">模拟换天气</button>
+        </div>
+      </section>
+      <section class="card panel">
+        <h3>我喜欢</h3>
+        <div class="pills">${INTERESTS.map(i=>`<button class="pill" data-int="${i.k}" aria-pressed="${p.interests.includes(i.k)}">${i.n}</button>`).join('')}</div>
+      </section>
+      <section class="card panel">
+        <h3>人均预算</h3>
+        <div class="range-row"><input type="range" id="budget" min="0" max="300" step="10" value="${p.budget}" aria-label="人均预算"><output class="num" id="budgetOut">¥${p.budget}</output></div>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px"><input type="checkbox" id="stu" ${p.student?'checked':''} style="accent-color:var(--accent)"> 我是学生（按学生价计算）</label>
+      </section>
+      <section class="card panel">
+        <h3>同行人数</h3>
+        <div class="stepper"><button data-step="-1" aria-label="减少">−</button><output class="num">${p.group} 人</output><button data-step="1" aria-label="增加">+</button>
+        <span style="font-size:13px;color:var(--muted);margin-left:6px">${p.group===1?'一个人也能玩，或去组队':''}</span></div>
+      </section>
+    </aside>
+    <section style="min-width:0">
+      <div class="card brief"><div class="brief-ico">荐</div><div><div class="eyebrow">本周末推荐摘要</div><p>${brief}</p></div></div>
+      <div class="feed-tools">
+        <span class="count">${list.length} 个活动 · <span class="sample">示例数据</span></span>
+        <div class="pills" role="group" aria-label="分类">
+          <button class="pill" data-cat="all" aria-pressed="${catFilter==='all'}">全部</button>
+          ${INTERESTS.map(i=>`<button class="pill" data-cat="${i.k}" aria-pressed="${catFilter===i.k}">${i.n}</button>`).join('')}
+        </div>
+        <select id="sort" aria-label="排序" class="btn sm">
+          <option value="match" ${p.sort==='match'?'selected':''}>按匹配度</option>
+          <option value="price" ${p.sort==='price'?'selected':''}>按价格</option>
+          <option value="heat" ${p.sort==='heat'?'selected':''}>按热度</option>
+        </select>
+      </div>
+      <div class="grid">${list.map(cardHTML).join('')}</div>
+    </section>
+  </div>`;
+  const app=$('#app');
+  app.querySelectorAll('[data-wday]').forEach(b=>b.onclick=()=>{S.prefs.day=b.dataset.wday;save();render()});
+  $('#flipW').onclick=()=>{
+    const w=S.weather; const sat=w.sat.k==='sunny';
+    S.weather= sat? {sat:{cond:'中雨',k:'rainy',temp:'8–12°C',rain:85,note:'全天有雨'},sun:{cond:'多云',k:'sunny',temp:'10–16°C',rain:20,note:'适合户外'}} : structuredClone(DEFAULT_WEATHER);
+    save();render();toast('已切换天气，推荐已重新计算');
+  };
+  app.querySelectorAll('[data-int]').forEach(b=>b.onclick=()=>{const k=b.dataset.int,i=S.prefs.interests;S.prefs.interests=i.includes(k)?i.filter(x=>x!==k):[...i,k];save();render()});
+  $('#budget').oninput=e=>{$('#budgetOut').textContent='¥'+e.target.value};
+  $('#budget').onchange=e=>{S.prefs.budget=+e.target.value;save();render()};
+  $('#stu').onchange=e=>{S.prefs.student=e.target.checked;save();render()};
+  app.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{S.prefs.group=Math.max(1,Math.min(10,S.prefs.group+ +b.dataset.step));save();render()});
+  app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{catFilter=b.dataset.cat;render()});
+  $('#sort').onchange=e=>{S.prefs.sort=e.target.value;save();render()};
+  bindCards(app);
+}
+function cardHTML({a,s,reasons}){
+  const c=CATS[a.cat]; const pr=priceOf(a);
+  const inPlan=S.plan.sat.includes(a.id)||S.plan.sun.includes(a.id);
+  return `<article class="card act">
+    <button class="cover" style="background:${c.g}" data-open="${a.id}" aria-label="查看 ${esc(a.t)}">
+      <span class="cat">${c.n} · ${a.indoor?'室内':'户外'}</span><span class="match">${s}%</span><span class="big">${c.n}</span>
+    </button>
+    <div class="act-b">
+      <h3>${esc(a.t)}</h3>
+      <div class="meta"><span>${a.area}</span><span>${a.days.map(d=>DAYN[d]).join('/')} ${a.time}</span></div>
+      <div class="reasons">${reasons.slice(0,3).map(([k,t])=>`<span class="chip ${k}">${t}</span>`).join('')}</div>
+      <div class="act-f"><span class="price">${money(pr)}${pr?'<small> /人</small>':''}</span>
+        <button class="btn sm" data-open="${a.id}">详情</button>
+        <button class="btn sm ${inPlan?'':'primary'}" data-addplan="${a.id}">${inPlan?'已加入':'加入行程'}</button>
+      </div>
+    </div></article>`;
+}
+function bindCards(root){
+  root.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openAct(b.dataset.open));
+  root.querySelectorAll('[data-addplan]').forEach(b=>b.onclick=()=>addToPlan(b.dataset.addplan));
+}
+function addToPlan(id,day){
+  const a=act(id);
+  if(S.plan.sat.includes(id)||S.plan.sun.includes(id)){toast('已经在行程里了');return}
+  if(!day){const p=S.prefs.day; day=(p!=='any'&&a.days.includes(p))?p:a.days.find(d=>S.weather[d].rain<50||a.indoor)||a.days[0]}
+  S.plan[day].push(id);save();render();toast(`已加入${DAYN[day]}行程`);
+}
+
+/* ---------- activity detail modal ---------- */
+function modal(html,onMount){
+  const root=$('#modalRoot');
+  root.innerHTML=`<div class="scrim" role="dialog" aria-modal="true"><div class="sheet">${html}</div></div>`;
+  const sc=root.firstChild; sc.onclick=e=>{if(e.target===sc)closeModal()};
+  document.addEventListener('keydown',escClose);
+  onMount&&onMount(sc);
+}
+function escClose(e){if(e.key==='Escape')closeModal()}
+function closeModal(){$('#modalRoot').innerHTML='';document.removeEventListener('keydown',escClose)}
+function openAct(id){
+  const a=act(id),c=CATS[a.cat],{s,reasons}=score(a),pr=priceOf(a);
+  const teams=S.teams.filter(t=>t.act===id);
+  const g=S.prefs.group;
+  const ws=a.days.map(d=>`${DAYN[d]} ${S.weather[d].cond}`).join(' · ');
+  modal(`
+    <div class="cover" style="background:${c.g};position:relative"><span class="cat">${c.n} · ${a.indoor?'室内':'户外'}</span><span class="big">${c.n}</span><button class="x" aria-label="关闭" data-close>×</button></div>
+    <div class="sheet-b">
+      <div><div class="eyebrow">匹配度 <span class="num">${s}%</span> · ${a.area}</div><h2>${esc(a.t)}</h2></div>
+      <div class="reasons">${reasons.map(([k,t])=>`<span class="chip ${k}">${t}</span>`).join('')}</div>
+      <div class="kv">
+        <div><span>时间</span><b>${a.days.map(d=>DAYN[d]).join('/')}<br>${a.time}</b></div>
+        <div><span>费用 / 人</span><b class="num">${money(pr)}${a.stu<a.price&&S.prefs.student?` <s style="color:var(--muted);font-size:12px">¥${a.price}</s>`:''}</b></div>
+        <div><span>时长 · 人数</span><b class="num">${a.dur}h · ${a.g[0]}–${a.g[1]}人</b></div>
+      </div>
+      <p style="margin:0">${esc(a.desc)}</p>
+      <div class="chip rain" style="align-self:flex-start;white-space:normal">天气：${ws}${!a.indoor&&a.days.some(d=>S.weather[d].rain>=50)?'，下雨的那天建议改期或换室内':''}</div>
+      <div class="calc">${g} 人同行 AA：<span class="num">${money(pr)} × ${g} = ¥${pr*g}</span>，人均 <span class="num">${money(pr)}</span>${pr>S.prefs.budget?`<br><span style="color:var(--warn)">超出你的预算 ¥${pr-S.prefs.budget}/人</span>`:''}</div>
+      <div><b style="font-size:14px">过来人小贴士</b><p style="margin:4px 0 0;color:var(--muted);font-size:14px">${esc(a.tip)}</p></div>
+      <div>
+        <b style="font-size:14px">正在组队 (${teams.length})</b>
+        <div class="list" style="margin-top:8px">${teams.length?teams.map(t=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;background:var(--bg);border-radius:10px;padding:8px 12px"><span>${esc(t.title)} <span class="num" style="color:var(--muted)">${t.members.length}/${t.max}</span></span><button class="btn sm" data-jt="${t.id}" ${t.members.includes(S.me)||t.members.length>=t.max?'disabled':''}>${t.members.includes(S.me)?'已加入':t.members.length>=t.max?'已满':'加入'}</button></div>`).join(''):'<div style="font-size:14px;color:var(--muted)">还没人发起，你来当队长？</div>'}</div>
+      </div>
+      <div class="row">
+        <button class="btn primary" data-ap>${S.plan.sat.includes(id)||S.plan.sun.includes(id)?'已在行程中':'加入行程'}</button>
+        <button class="btn" data-ct>发起组队</button>
+        <button class="btn" data-ci>我去过，打卡</button>
+      </div>
+    </div>`,sc=>{
+      sc.querySelector('[data-close]').onclick=closeModal;
+      sc.querySelector('[data-ap]').onclick=()=>{closeModal();addToPlan(id)};
+      sc.querySelector('[data-ct]').onclick=()=>createTeam(id);
+      sc.querySelector('[data-ci]').onclick=()=>checkinForm(id);
+      sc.querySelectorAll('[data-jt]').forEach(b=>b.onclick=()=>{joinTeam(b.dataset.jt);openAct(id)});
+    });
+}
+
+/* ---------- teams ---------- */
+let teamFilter='open';
+function joinTeam(tid){
+  const t=S.teams.find(x=>x.id===tid); if(!t||t.members.includes(S.me)||t.members.length>=t.max)return;
+  t.members.push(S.me);save();render();toast(`已加入「${t.title}」，队长会在群里@你`);
+}
+function leaveTeam(tid){const t=S.teams.find(x=>x.id===tid);t.members=t.members.filter(m=>m!==S.me);if(!t.members.length)S.teams=S.teams.filter(x=>x.id!==tid);save();render();toast('已退出队伍')}
+function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from({length:4},()=>c[Math.floor(Math.random()*c.length)]).join('')}
+function createTeam(preId){
+  const opts=ACTS.map(a=>`<option value="${a.id}" ${a.id===preId?'selected':''}>${esc(a.t)}</option>`).join('');
+  modal(`<div class="sheet-b"><div style="display:flex;justify-content:space-between;align-items:center"><h2>发起组队</h2><button class="btn ghost" data-close aria-label="关闭">×</button></div>
+    <form id="tf" class="form-grid">
+      <label class="f full">去哪儿<select id="tf-act">${opts}</select></label>
+      <label class="f full">一句话招募<input id="tf-title" required maxlength="30" placeholder="例如：周六早起徒步，配速慢，欢迎新手"></label>
+      <label class="f">哪天<select id="tf-day"><option value="sat">周六</option><option value="sun">周日</option></select></label>
+      <label class="f">一共几人<input id="tf-max" type="number" min="2" max="12" value="${Math.max(2,S.prefs.group+1)}"></label>
+      <label class="f full">集合 & 备注<textarea id="tf-note" placeholder="集合时间地点、AA 方式、要带什么"></textarea></label>
+      <div class="full row"><button class="btn primary" type="submit">发布组队</button><button class="btn" type="button" data-close>取消</button></div>
+    </form></div>`,sc=>{
+      sc.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+      const sel=$('#tf-act',sc),day=$('#tf-day',sc);
+      const syncDay=()=>{const a=act(sel.value);day.innerHTML=a.days.map(d=>`<option value="${d}">${DAYN[d]}（${S.weather[d].cond}）</option>`).join('')};
+      sel.onchange=syncDay;syncDay();
+      $('#tf',sc).onsubmit=e=>{e.preventDefault();
+        const t={id:'t'+Date.now(),act:sel.value,title:$('#tf-title',sc).value.trim(),host:S.me,school:'',day:day.value,members:[S.me],max:Math.max(2,+$('#tf-max',sc).value||2),note:$('#tf-note',sc).value.trim(),code:genCode(),mine:true};
+        S.teams.unshift(t);save();closeModal();teamFilter='mine';location.hash='teams';render();shareTeam(t.id);
+      };
+    });
+}
+function shareText(t){const a=act(t.act);return `【周末去哪 · 组队】${t.title}\n活动：${a.t}\n时间：${DAYN[t.day]} ${a.time}\n地点：${a.area}\n人均：${money(priceOf(a))}\n还差 ${t.max-t.members.length} 人，邀请码 ${t.code}`}
+function shareTeam(tid){
+  const t=S.teams.find(x=>x.id===tid);
+  modal(`<div class="sheet-b"><div style="display:flex;justify-content:space-between;align-items:center"><h2>邀请朋友加入</h2><button class="btn ghost" data-close aria-label="关闭">×</button></div>
+    <p style="margin:0;color:var(--muted)">复制下面这段发到群里，朋友在「组队」页输入邀请码 <span class="code">${t.code}</span> 就能加入。</p>
+    <div class="copybox" id="cb">${esc(shareText(t))}</div>
+    <div class="row"><button class="btn primary" id="cp">复制邀请</button><button class="btn" data-close>完成</button></div></div>`,sc=>{
+      sc.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+      $('#cp',sc).onclick=()=>copy(shareText(t),$('#cb',sc));
+    });
+}
+function copy(text,el){
+  navigator.clipboard?.writeText(text).then(()=>toast('已复制')).catch(()=>{selectEl(el);toast('请手动复制选中的文字')}) ?? (selectEl(el),toast('请手动复制选中的文字'));
+}
+function selectEl(el){if(!el)return;const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+function vTeams(){
+  let list=S.teams;
+  if(teamFilter==='open')list=list.filter(t=>t.members.length<t.max&&!t.members.includes(S.me));
+  if(teamFilter==='mine')list=list.filter(t=>t.members.includes(S.me));
+  const mineN=S.teams.filter(t=>t.members.includes(S.me)).length;
+  $('#app').innerHTML=`
+  <div class="sec-h"><div><div class="eyebrow">找搭子</div><h2>组队出发</h2><p>一个人不想去？凑不满剧本杀？在这里找同校同好一起。</p></div>
+    <button class="btn primary" id="newT">+ 发起组队</button></div>
+  <div class="two">
+    <section style="min-width:0">
+      <div class="pills" style="margin-bottom:12px">
+        <button class="pill" data-tf="open" aria-pressed="${teamFilter==='open'}">可加入</button>
+        <button class="pill" data-tf="mine" aria-pressed="${teamFilter==='mine'}">我的队伍 ${mineN?`(${mineN})`:''}</button>
+        <button class="pill" data-tf="all" aria-pressed="${teamFilter==='all'}">全部</button>
+      </div>
+      <div class="list">${list.length?list.map(teamHTML).join(''):`<div class="empty">${teamFilter==='mine'?'你还没有加入队伍。去「可加入」看看，或者自己发起一个。':'暂时没有可加入的队伍，发起一个吧。'}</div>`}</div>
+    </section>
+    <aside class="list">
+      <div class="card panel">
+        <h3>有邀请码？</h3>
+        <form id="codeF" class="row"><input id="codeIn" maxlength="4" placeholder="4 位邀请码" style="flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;text-transform:uppercase;letter-spacing:.2em" class="num"><button class="btn primary">加入</button></form>
+        <p style="font-size:12px;color:var(--muted);margin:8px 0 0">试试 <span class="code">K7Q2</span>（茶园徒步队）</p>
+      </div>
+      <div class="card howto"><b>组队怎么玩</b>
+        <ol><li>在活动详情或这里发起组队，写清集合点和 AA 方式</li><li>复制邀请发到班群 / 社团群，朋友用邀请码加入</li><li>人齐后一起出发，结束后每人都能打卡、写攻略</li></ol>
+      </div>
+    </aside>
+  </div>`;
+  const app=$('#app');
+  $('#newT').onclick=()=>createTeam();
+  app.querySelectorAll('[data-tf]').forEach(b=>b.onclick=()=>{teamFilter=b.dataset.tf;render()});
+  app.querySelectorAll('[data-join]').forEach(b=>b.onclick=()=>joinTeam(b.dataset.join));
+  app.querySelectorAll('[data-leave]').forEach(b=>b.onclick=()=>leaveTeam(b.dataset.leave));
+  app.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareTeam(b.dataset.share));
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openAct(b.dataset.open));
+  $('#codeF').onsubmit=e=>{e.preventDefault();const c=$('#codeIn').value.trim().toUpperCase();const t=S.teams.find(x=>x.code===c);
+    if(!t){toast('没有找到这个邀请码，检查一下是否输错');return}
+    if(t.members.includes(S.me)){toast('你已经在这个队伍里了');return}
+    if(t.members.length>=t.max){toast('这个队伍已经满员');return}
+    teamFilter='mine';joinTeam(t.id)};
+}
+function teamHTML(t){
+  const a=act(t.act),c=CATS[a.cat],inT=t.members.includes(S.me),full=t.members.length>=t.max;
+  const seats=Array.from({length:t.max},(_,i)=>{const m=t.members[i];return `<span class="seat ${m?'on':''} ${m===S.me?'me':''}" title="${m?esc(m):'空位'}">${m?esc(m.slice(0,1)):''}</span>`}).join('');
+  return `<article class="card team">
+    <div class="dot" style="background:${c.g}">${c.n.slice(0,1)}</div>
+    <div style="min-width:0"><h3>${esc(t.title)}</h3>
+      <p><button class="btn ghost sm" style="padding:0;color:var(--accent)" data-open="${a.id}">${esc(a.t)}</button> · ${DAYN[t.day]} · ${money(priceOf(a))}/人</p>
+      ${t.note?`<p>${esc(t.note)}</p>`:''}
+      <div class="seats">${seats}<span class="num" style="font-size:12px;color:var(--muted);margin-left:4px">${t.members.length}/${t.max}${t.school?' · 队长@'+esc(t.host)+' '+esc(t.school):''}</span></div>
+    </div>
+    <div class="team-act">${inT?`<span class="chip good">已加入</span><div class="row"><button class="btn sm" data-share="${t.id}">邀请</button><button class="btn sm ghost" data-leave="${t.id}">退出</button></div>`:`<button class="btn sm ${full?'':'primary'}" data-join="${t.id}" ${full?'disabled':''}>${full?'已满员':'加入'}</button>`}</div>
+  </article>`;
+}
+
+/* ---------- plan ---------- */
+function vPlan(){
+  const all=[...S.plan.sat,...S.plan.sun].map(act);
+  const total=all.reduce((s,a)=>s+priceOf(a),0);
+  const cap=S.prefs.budget*2;
+  $('#app').innerHTML=`
+  <div class="sec-h"><div><div class="eyebrow">我的周末</div><h2>行程单</h2><p>从「发现」加入活动，系统会结合天气提醒你。</p></div>
+    <div class="row"><button class="btn" id="sharePlan" ${all.length?'':'disabled'}>复制行程分享</button><button class="btn ghost" id="clearPlan" ${all.length?'':'disabled'}>清空</button></div></div>
+  <div class="days">${['sat','sun'].map(dayHTML).join('')}</div>
+  <div class="card total">
+    <div><div class="eyebrow">周末总花费 / 人</div><b>¥${total}</b> <span style="color:var(--muted);font-size:13px">两天预算 ¥${cap}</span>
+      <div class="bar"><i class="${total>cap?'over':''}" style="width:${Math.min(100,cap?total/cap*100:0)}%"></i></div></div>
+    <div style="font-size:14px;color:${total>cap?'var(--warn)':'var(--muted)'}">${total>cap?`超出预算 ¥${total-cap}，试试换个免费活动？`:all.length?`还剩 ¥${cap-total} 可以用来吃顿好的`:'还没有安排'}</div>
+  </div>`;
+  const app=$('#app');
+  app.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const [d,id]=b.dataset.rm.split(':');S.plan[d]=S.plan[d].filter(x=>x!==id);save();render()});
+  app.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const [d,id]=b.dataset.mv.split(':');const o=d==='sat'?'sun':'sat';S.plan[d]=S.plan[d].filter(x=>x!==id);S.plan[o].push(id);save();render();toast(`已移到${DAYN[o]}`)});
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openAct(b.dataset.open));
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+  $('#clearPlan').onclick=()=>{S.plan={sat:[],sun:[]};save();render();toast('行程已清空')};
+  $('#sharePlan').onclick=()=>{
+    const txt='【我的周末行程】\n'+['sat','sun'].map(d=>`${DAYN[d]}（${S.weather[d].cond} ${S.weather[d].temp}）\n`+(S.plan[d].length?S.plan[d].map(id=>{const a=act(id);return `· ${a.time} ${a.t}｜${a.area}｜${money(priceOf(a))}`}).join('\n'):'· 在家躺平')).join('\n')+`\n人均合计 ¥${total}`;
+    modal(`<div class="sheet-b"><h2>分享行程</h2><div class="copybox" id="cb">${esc(txt)}</div><div class="row"><button class="btn primary" id="cp">复制</button><button class="btn" data-close>完成</button></div></div>`,sc=>{
+      sc.querySelector('[data-close]').onclick=closeModal;$('#cp',sc).onclick=()=>copy(txt,$('#cb',sc))});
+  };
+}
+function dayHTML(d){
+  const w=S.weather[d],items=S.plan[d].map(act);
+  const warn=items.filter(a=>!a.indoor&&w.rain>=50);
+  const off=items.filter(a=>!a.days.includes(d));
+  const hours=items.reduce((s,a)=>s+a.dur,0);
+  return `<section class="card day">
+    <div class="day-h"><h3>${DAYN[d]}</h3><span class="chip ${w.rain>=50?'rain':'tk'}">${w.cond} · <span class="num">${w.temp}</span></span></div>
+    ${warn.length?`<div class="chip bad" style="white-space:normal;margin-bottom:10px">「${warn.map(a=>esc(a.t.split('：')[0])).join('、')}」是户外活动，${DAYN[d]}降水 ${w.rain}%，建议移到另一天</div>`:''}
+    ${off.length?`<div class="chip bad" style="white-space:normal;margin-bottom:10px">「${off.map(a=>esc(a.t.split('：')[0])).join('、')}」${DAYN[d]}不开放</div>`:''}
+    ${items.length?`<div class="tl">${items.map(a=>`<div class="stop-c"><div style="min-width:0"><b>${esc(a.t)}</b><span>${a.time} · ${a.area} · <span class="num">${money(priceOf(a))}</span></span></div>
+      <div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-mv="${d}:${a.id}" title="移到另一天">⇄</button><button class="btn sm ghost" data-rm="${d}:${a.id}" aria-label="移除">×</button></div></div>`).join('')}</div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">共约 <span class="num">${hours}</span> 小时${hours>9?'，安排有点满，注意休息':''}</p>`
+      :`<div class="empty">${DAYN[d]}还空着。<br><button class="btn sm primary" style="margin-top:8px" data-go="discover">去发现活动</button></div>`}
+  </section>`;
+}
+
+/* ---------- check-in ---------- */
+const BADGES=[
+  {n:'初来乍到',d:'完成第 1 次打卡',ok:c=>c.length>=1},
+  {n:'城市漫游者',d:'打卡 3 种类型',ok:c=>new Set(c.map(x=>act(x.act).cat)).size>=3},
+  {n:'省钱达人',d:'打卡 2 个免费活动',ok:c=>c.filter(x=>x.cost===0).length>=2},
+  {n:'雨天玩家',d:'打卡 2 个室内活动',ok:c=>c.filter(x=>act(x.act).indoor).length>=2},
+];
+function vCheckin(){
+  const c=S.checkins;
+  const cats=new Set(c.map(x=>act(x.act).cat));
+  const spend=c.reduce((s,x)=>s+(x.cost||0),0);
+  const avg=c.length?(c.reduce((s,x)=>s+x.rating,0)/c.length).toFixed(1):'–';
+  $('#app').innerHTML=`
+  <div class="sec-h"><div><div class="eyebrow">我的足迹</div><h2>打卡记录</h2><p>每去一个地方就盖一个章，集齐 7 类解锁全部城市印章。</p></div>
+    <button class="btn primary" id="newC">+ 新打卡</button></div>
+  <div class="stats">
+    <div class="card stat"><span>打卡次数</span><b>${c.length}</b></div>
+    <div class="card stat"><span>解锁类型</span><b>${cats.size}<small style="font-size:14px;color:var(--muted)">/7</small></b></div>
+    <div class="card stat"><span>累计花费</span><b>¥${spend}</b></div>
+    <div class="card stat"><span>平均评分</span><b>${avg}</b></div>
+  </div>
+  <section class="card passport">
+    <h3 style="font-size:15px">城市印章</h3>
+    <div class="stamps">${Object.entries(CATS).map(([k,v])=>`<div class="stamp ${cats.has(k)?'got':''}" style="${cats.has(k)?`background:${v.g};border-color:transparent`:''}">${v.n}<small>${cats.has(k)?'已解锁':'未解锁'}</small></div>`).join('')}</div>
+    <div class="row" style="margin-top:14px">${BADGES.map(b=>`<span class="chip ${b.ok(c)?'good':''}" title="${b.d}">${b.ok(c)?'✓ ':''}${b.n} · ${b.d}</span>`).join('')}</div>
+  </section>
+  <div class="log">${c.length?c.map(x=>{const a=act(x.act);return `<article class="card entry">
+      ${x.photo?`<img class="ph" src="${x.photo}" alt="${esc(a.t)} 打卡照片">`:`<div class="ph" style="background:${CATS[a.cat].g};color:#fff;font-weight:700">${CATS[a.cat].n}</div>`}
+      <div style="min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3>${esc(a.t)}</h3><span class="num" style="font-size:13px;color:var(--muted)">${x.date}</span></div>
+        <div class="stars" aria-label="${x.rating} 星">${'★'.repeat(x.rating)}${'☆'.repeat(5-x.rating)}</div>
+        <p>${esc(x.note)||'（没写感想）'}</p>
+        <div class="row" style="margin-top:8px">${x.sample?'<span class="sample">示例</span>':''}<button class="btn sm" data-toguide="${x.id}">写成攻略</button><button class="btn sm ghost" data-delc="${x.id}">删除</button></div>
+      </div></article>`}).join(''):'<div class="empty">还没有打卡。去过哪里？点「新打卡」记下来。</div>'}</div>`;
+  const app=$('#app');
+  $('#newC').onclick=()=>checkinForm();
+  app.querySelectorAll('[data-delc]').forEach(b=>b.onclick=()=>{S.checkins=S.checkins.filter(x=>x.id!==b.dataset.delc);save();render();toast('已删除这条打卡')});
+  app.querySelectorAll('[data-toguide]').forEach(b=>b.onclick=()=>{const x=S.checkins.find(y=>y.id===b.dataset.toguide);guideForm(x)});
+}
+function checkinForm(preId){
+  let rating=5,photo=null;
+  const opts=ACTS.map(a=>`<option value="${a.id}" ${a.id===preId?'selected':''}>${esc(a.t)}</option>`).join('');
+  const today=new Date().toISOString().slice(0,10);
+  modal(`<div class="sheet-b"><div style="display:flex;justify-content:space-between;align-items:center"><h2>打卡</h2><button class="btn ghost" data-close aria-label="关闭">×</button></div>
+    <form id="cf" class="form-grid">
+      <label class="f full">去了哪里<select id="cf-act">${opts}</select></label>
+      <label class="f">日期<input id="cf-date" type="date" value="${today}"></label>
+      <label class="f">实际花费 (¥)<input id="cf-cost" type="number" min="0" value="${priceOf(act(preId||ACTS[0].id))}"></label>
+      <div class="f full"><span style="font-size:13px;color:var(--muted);font-weight:500">评分</span><div class="star-in" id="cf-stars">${[1,2,3,4,5].map(i=>`<button type="button" data-r="${i}" class="on" aria-label="${i} 星">★</button>`).join('')}</div></div>
+      <label class="f full">一句话感想<textarea id="cf-note" placeholder="值得去吗？有什么坑？"></textarea></label>
+      <div class="f full"><span style="font-size:13px;color:var(--muted);font-weight:500">照片（可选）</span>
+        <label class="btn" style="align-self:flex-start">选择照片<input type="file" accept="image/*" id="cf-photo" class="hidden-input"></label>
+        <img id="cf-prev" alt="照片预览" style="max-width:160px;border-radius:10px" hidden></div>
+      <div class="full row"><button class="btn primary" type="submit">盖章打卡</button><button class="btn" type="button" data-close>取消</button></div>
+    </form></div>`,sc=>{
+      sc.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+      $('#cf-act',sc).onchange=e=>{$('#cf-cost',sc).value=priceOf(act(e.target.value))};
+      const stars=[...sc.querySelectorAll('[data-r]')];
+      stars.forEach(b=>b.onclick=()=>{rating=+b.dataset.r;stars.forEach(s=>s.classList.toggle('on',+s.dataset.r<=rating))});
+      $('#cf-photo',sc).onchange=e=>{const f=e.target.files[0];if(!f)return;shrink(f,480).then(d=>{photo=d;const p=$('#cf-prev',sc);p.src=d;p.hidden=false}).catch(()=>toast('这张图片读不了，换一张试试'))};
+      $('#cf',sc).onsubmit=e=>{e.preventDefault();
+        const before=new Set(S.checkins.map(x=>act(x.act).cat));
+        const x={id:'c'+Date.now(),act:$('#cf-act',sc).value,date:$('#cf-date',sc).value,rating,note:$('#cf-note',sc).value.trim(),photo,cost:Math.max(0,+$('#cf-cost',sc).value||0)};
+        S.checkins.unshift(x);save();closeModal();location.hash='checkin';render();
+        const cat=act(x.act).cat;toast(before.has(cat)?'打卡成功':`解锁新印章：${CATS[cat].n}`);
+      };
+    });
+}
+function shrink(file,max){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const cv=document.createElement('canvas');cv.width=img.width*k;cv.height=img.height*k;cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);res(cv.toDataURL('image/jpeg',.75))};img.onerror=rej;img.src=r.result};r.onerror=rej;r.readAsDataURL(file)})}
+
+/* ---------- guides ---------- */
+let gTag='全部',gOpen=new Set();
+function vGuides(){
+  const tags=['全部','收藏',...new Set(S.guides.flatMap(g=>g.tags))];
+  let list=S.guides;
+  if(gTag==='收藏')list=list.filter(g=>g.saved);
+  else if(gTag!=='全部')list=list.filter(g=>g.tags.includes(gTag));
+  list=[...list].sort((a,b)=>(b.mine?1:0)-(a.mine?1:0)||b.likes-a.likes);
+  $('#app').innerHTML=`
+  <div class="sec-h"><div><div class="eyebrow">过来人经验</div><h2>攻略分享</h2><p>同学们走过的路线，一键复制到自己的行程。</p></div>
+    <button class="btn primary" id="newG">+ 写攻略</button></div>
+  <div class="gfilter">${tags.map(t=>`<button class="pill" data-gt="${esc(t)}" aria-pressed="${gTag===t}">${esc(t)}</button>`).join('')}</div>
+  <div class="list">${list.length?list.map(g=>`<article class="card guide">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3>${esc(g.title)}</h3><span class="chip tk num">人均 ¥${g.budget} · ${esc(g.days)}</span></div>
+    <div class="by"><span>@${esc(g.author)}${g.school?' · '+esc(g.school):''}</span>${g.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}${g.mine?'<span class="chip good">我写的</span>':''}</div>
+    <div class="route">${g.acts.map((id,i)=>`${i?'<span class="arr">→</span>':''}<button class="stop btn sm" style="border:0" data-open="${id}">${esc(act(id).t.split('：')[0])}</button>`).join('')}</div>
+    <div class="body ${gOpen.has(g.id)?'':'clip'}">${esc(g.body)}</div>
+    <div class="guide-f"><button class="btn ghost sm sp" data-more="${g.id}">${gOpen.has(g.id)?'收起':'展开全文'}</button>
+      <button class="btn sm ${g.liked?'liked':''}" data-like="${g.id}">♥ <span class="num">${g.likes}</span></button>
+      <button class="btn sm" data-save="${g.id}">${g.saved?'已收藏':'收藏'}</button>
+      <button class="btn sm primary" data-use="${g.id}">套用到我的行程</button></div>
+  </article>`).join(''):'<div class="empty">这里还没有攻略。</div>'}</div>`;
+  const app=$('#app');
+  $('#newG').onclick=()=>guideForm();
+  app.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTag=b.dataset.gt;render()});
+  app.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{const id=b.dataset.more;gOpen.has(id)?gOpen.delete(id):gOpen.add(id);render()});
+  app.querySelectorAll('[data-like]').forEach(b=>b.onclick=()=>{const g=S.guides.find(x=>x.id===b.dataset.like);g.liked=!g.liked;g.likes+=g.liked?1:-1;save();render()});
+  app.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{const g=S.guides.find(x=>x.id===b.dataset.save);g.saved=!g.saved;save();render();toast(g.saved?'已收藏':'已取消收藏')});
+  app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openAct(b.dataset.open));
+  app.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{const g=S.guides.find(x=>x.id===b.dataset.use);let n=0;
+    g.acts.forEach(id=>{if(S.plan.sat.includes(id)||S.plan.sun.includes(id))return;const a=act(id);const d=a.days.find(x=>a.indoor||S.weather[x].rain<50)||a.days[0];S.plan[d].push(id);n++});
+    save();renderTabs();toast(n?`已把 ${n} 个活动加入行程`:'这些活动已经都在行程里了')});
+}
+function guideForm(fromCheckin){
+  const pre=fromCheckin?[fromCheckin.act]:[];
+  const body=fromCheckin?`${fromCheckin.date} 去了「${act(fromCheckin.act).t}」，打了 ${fromCheckin.rating} 星。\n${fromCheckin.note||''}\n小贴士：${act(fromCheckin.act).tip}`:'';
+  modal(`<div class="sheet-b"><div style="display:flex;justify-content:space-between;align-items:center"><h2>写攻略</h2><button class="btn ghost" data-close aria-label="关闭">×</button></div>
+    <form id="gf" class="form-grid">
+      <label class="f full">标题<input id="gf-t" required maxlength="40" value="${fromCheckin?esc(act(fromCheckin.act).t.split('：')[0]+' 真实体验'):''}" placeholder="例如：雨天室内一日游，人均 100"></label>
+      <div class="f full"><span style="font-size:13px;color:var(--muted);font-weight:500">路线（按顺序勾选）</span>
+        <div class="pills" id="gf-acts">${ACTS.map(a=>`<button type="button" class="pill" data-ga="${a.id}" aria-pressed="${pre.includes(a.id)}">${esc(a.t.split('：')[0])}</button>`).join('')}</div></div>
+      <label class="f">标签（空格分隔）<input id="gf-tags" value="${fromCheckin?(act(fromCheckin.act).indoor?'室内':'户外'):''}" placeholder="雨天 省钱 拍照"></label>
+      <label class="f">时长<select id="gf-d"><option>半天</option><option selected>1 天</option><option>2 天</option></select></label>
+      <label class="f full">正文<textarea id="gf-b" required rows="6" placeholder="怎么去、几点到、吃什么、哪里有坑">${esc(body)}</textarea></label>
+      <div class="full row"><button class="btn primary" type="submit">发布攻略</button><button class="btn" type="button" data-close>取消</button></div>
+    </form></div>`,sc=>{
+      sc.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+      const order=[...pre];
+      sc.querySelectorAll('[data-ga]').forEach(b=>b.onclick=()=>{const id=b.dataset.ga;const i=order.indexOf(id);i>=0?order.splice(i,1):order.push(id);b.setAttribute('aria-pressed',i<0)});
+      $('#gf',sc).onsubmit=e=>{e.preventDefault();
+        if(!order.length){toast('至少选一个路线里的活动');return}
+        const g={id:'g'+Date.now(),title:$('#gf-t',sc).value.trim(),author:S.me,school:'',acts:order,tags:$('#gf-tags',sc).value.split(/\s+/).filter(Boolean).slice(0,4),budget:order.reduce((s,id)=>s+priceOf(act(id)),0),body:$('#gf-b',sc).value.trim(),likes:0,liked:false,saved:false,days:$('#gf-d',sc).value,mine:true};
+        S.guides.unshift(g);save();closeModal();gTag='全部';location.hash='guides';render();toast('攻略已发布');
+      };
+    });
+}
+
+/* ---------- toast ---------- */
+let tt;
+function toast(m){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(tt);tt=setTimeout(()=>r.innerHTML='',2200)}
+
+render();
+</script>
+</body>
+</html>
